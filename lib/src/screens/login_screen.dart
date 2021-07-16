@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:productos_app_firebase/src/providers/login_form_provider.dart';
+import 'package:productos_app_firebase/src/utils/validators.dart';
 import 'package:provider/provider.dart';
 import 'package:productos_app_firebase/src/ui_widgets/input_decorations.dart';
 
@@ -79,14 +80,7 @@ class _LoginForm extends StatelessWidget {
                         labelText: 'Email',
                         prefixIcon: Icons.alternate_email_rounded),
                     onChanged: (value) => loginFormProvider.email = value,
-                    validator: (value) {
-                      String pattern =
-                          r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-                      RegExp regExp = new RegExp(pattern);
-                      return regExp.hasMatch(value ?? '')
-                          ? null
-                          : 'Email no valido';
-                    },
+                    validator: validateEmail,
                     style: TextStyle(fontSize: 14.0),
                   ),
 
@@ -104,11 +98,7 @@ class _LoginForm extends StatelessWidget {
                     ),
                     style: TextStyle(fontSize: 14.0),
                     onChanged: (value) => loginFormProvider.password = value,
-                    validator: (value) {
-                      return (value != null && value.length >= 6)
-                          ? null
-                          : 'El password debe de tener 6 caracteres mínimo';
-                    },
+                    validator: validatePassword,
                   ),
                   // Button
                   SizedBox(
