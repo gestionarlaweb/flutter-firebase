@@ -1,8 +1,8 @@
 /*
- validator: (value) {
-  return utils.isNumeric(value) ? null : 'invalid number';
- },
+               validator: (value) {
+                    return utils.isNumeric(value) ? null : 'invalid number';},
 .....
+
 bool isNumeric(String s) {
   return num.tryParse(s) != null;
 }

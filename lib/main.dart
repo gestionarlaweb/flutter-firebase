@@ -6,17 +6,22 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-// This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Productos Firebase',
-      initialRoute: 'login',
+      initialRoute: 'home',
       routes: {
         'login': (_) => LoginScreen(),
         'home': (_) => HomeScreen(),
       },
+      theme: ThemeData.light().copyWith(
+        scaffoldBackgroundColor: Colors.grey[300],
+        appBarTheme: AppBarTheme(color: Colors.blueGrey, elevation: 0),
+        floatingActionButtonTheme:
+            FloatingActionButtonThemeData(backgroundColor: Colors.blueGrey),
+      ),
     );
   }
 }
