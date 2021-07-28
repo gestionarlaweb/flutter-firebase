@@ -1,17 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:productos_app_firebase/src/ui_widgets/input_decorations.dart';
+import 'package:productos_app_firebase/src/providers/product_form_provider.dart';
+import 'package:productos_app_firebase/src/screens/screens.dart';
+import 'package:productos_app_firebase/src/services/products_service.dart';
 import 'package:productos_app_firebase/src/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Provider
+    final productService = Provider.of<ProductsService>(context);
+
+    return ChangeNotifierProvider(
+      create: (_) => ProductFormProvider(productService.selectedProduct),
+      child: _ProductScreenBody(productService: productService),
+    );
+  }
+}
+
+class _ProductScreenBody extends StatelessWidget {
+  const _ProductScreenBody({
+    Key? key,
+    required this.productService,
+  }) : super(key: key);
+
+  final ProductsService productService;
+
+  @override
+  Widget build(BuildContext context) {
+    // Provider
+    final productForm = Provider.of<ProductFormProvider>(context);
+
     return Scaffold(
       body: SingleChildScrollView(
+        // Al hacer scroll se oculta el teclado
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           children: [
             Stack(
               children: [
-                ProductImage(),
+                ProductImage(url: productService.selectedProduct.picture),
                 Positioned(
                   top: 60,
                   left: 20,
@@ -25,15 +53,14 @@ class ProductScreen extends StatelessWidget {
                   top: 60,
                   right: 20,
                   child: IconButton(
-                    onPressed: () {
-                      // TODO Cámara o Galería
-                    },
+                    onPressed: () {},
                     icon: Icon(Icons.camera, size: 40, color: Colors.white),
                   ),
                 ),
               ],
             ),
-            _ProductForm(),
+            //_ProductForm(),
+            ProductFormScreen(),
             SizedBox(height: 100),
           ],
         ),
@@ -42,63 +69,13 @@ class ProductScreen extends StatelessWidget {
           FloatingActionButtonLocation.endDocked, // Colocarlo más abajo
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.save_outlined),
-        onPressed: () {
-          // TODO guardar productos
+        onPressed: () async {
+          // Si no es valido
+          if (!productForm.isValidForm()) return;
+          // Si es valido
+          await productService.saveOrCreateProduct(productForm.product);
         },
       ),
     );
   }
-}
-
-class _ProductForm extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.0),
-        width: double.infinity,
-        decoration: _buildBoxDecoration(),
-        child: Form(
-          child: Column(
-            children: [
-              SizedBox(height: 10.0),
-              TextFormField(
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: 'Nombre del producto', labelText: 'Nombre:'),
-              ),
-              SizedBox(height: 30),
-              TextFormField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: '\$150', labelText: 'Precio:'),
-              ),
-              SizedBox(height: 30),
-              SwitchListTile.adaptive(
-                value: true,
-                title: Text('Disponible'),
-                activeColor: Colors.indigo,
-                onChanged: (value) {
-                  // TODO...
-                },
-              ),
-              SizedBox(height: 30),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  BoxDecoration _buildBoxDecoration() => BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-            bottomRight: Radius.circular(25), bottomLeft: Radius.circular(25)),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              offset: Offset(0, 5),
-              blurRadius: 5)
-        ],
-      );
 }
