@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 class ProductImage extends StatelessWidget {
@@ -17,15 +20,7 @@ class ProductImage extends StatelessWidget {
             opacity: 0.9,
             child: ClipRRect(
               borderRadius: _borderRadiusTargetGeneral(),
-              child: this.url != null
-                  ? FadeInImage(
-                      image: NetworkImage(this.url!),
-                      placeholder: AssetImage('assets/images/jar-loading.gif'),
-                      fit: BoxFit.cover,
-                    )
-                  : Image(
-                      image: AssetImage('assets/images/no-image.png'),
-                      fit: BoxFit.cover),
+              child: getImage(url),
             ),
           ),
         ),
@@ -43,6 +38,26 @@ class ProductImage extends StatelessWidget {
           )
         ],
       );
+
+  Widget getImage(String? picture) {
+    // Si no nay imagen
+    if (picture == null)
+      return Image(
+          image: AssetImage('assets/images/no-image.png'), fit: BoxFit.cover);
+
+// Si el path empieza con 'http'
+    if (picture.startsWith('http')) {
+      return FadeInImage(
+        image: NetworkImage(this.url!),
+        placeholder: AssetImage('assets/images/jar-loading.gif'),
+        fit: BoxFit.cover,
+      );
+    }
+    return Image.file(
+      File(picture),
+      fit: BoxFit.cover,
+    );
+  }
 }
 
 BorderRadius _borderRadiusTargetGeneral() {

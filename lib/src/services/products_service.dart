@@ -1,5 +1,6 @@
 // Peticiones Http con Provider
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:productos_app_firebase/src/global/environment.dart';
@@ -17,6 +18,9 @@ class ProductsService extends ChangeNotifier {
 
   // Producto seleccionado
   late Product selectedProduct;
+
+  // Para la Imagen   import 'dart:io';
+  File? newPictureFile;
 
   ProductsService() {
     this.loadProducts();
@@ -91,5 +95,43 @@ class ProductsService extends ChangeNotifier {
     this.products.add(product);
 
     return product.id!;
+  }
+
+  // Path de imagen de la vista previa
+  void updateSelectedProductImage(String path) {
+    this.selectedProduct.picture = path;
+    this.newPictureFile = File.fromUri(Uri(path: path));
+    notifyListeners();
+  }
+
+  // Subir la imagen a Cloudinary.com
+  Future<String?> uploadImage() async {
+    if (this.newPictureFile == null) return null;
+
+    // Estoy guardando
+    this.isSaving = true;
+    notifyListeners();
+
+    final url = Uri.parse(
+        'https://api.cloudinary.com/v1_1/da7ysnzgh/image/upload?upload_preset=ml_default');
+    final imageUploadRequest = http.MultipartRequest('POST', url);
+    final file =
+        await http.MultipartFile.fromPath('file', newPictureFile!.path);
+    imageUploadRequest.files.add(file);
+    // Disparar la petición
+    final streamResponse = await imageUploadRequest.send();
+    final resp = await http.Response.fromStream(streamResponse);
+
+    if (resp.statusCode != 200 && resp.statusCode != 201) {
+      print('algo salió mal !');
+      print(resp.body);
+      return null;
+    }
+
+    // Si todo bien
+    this.newPictureFile = null; // Ya subí la imagen
+
+    final decodedData = json.decode(resp.body);
+    return decodedData['secure_url']; // Estoy es necesario para Cloudinary.com
   }
 }

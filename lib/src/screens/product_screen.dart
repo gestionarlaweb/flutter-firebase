@@ -5,6 +5,8 @@ import 'package:productos_app_firebase/src/services/products_service.dart';
 import 'package:productos_app_firebase/src/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
+import 'package:image_picker/image_picker.dart';
+
 class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,7 @@ class _ProductScreenBody extends StatelessWidget {
                   top: 60,
                   right: 20,
                   child: IconButton(
-                    onPressed: () {},
+                    onPressed: pressedImageButton,
                     icon: Icon(Icons.camera, size: 40, color: Colors.white),
                   ),
                 ),
@@ -68,14 +70,34 @@ class _ProductScreenBody extends StatelessWidget {
       floatingActionButtonLocation:
           FloatingActionButtonLocation.endDocked, // Colocarlo más abajo
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.save_outlined),
-        onPressed: () async {
-          // Si no es valido
-          if (!productForm.isValidForm()) return;
-          // Si es valido
-          await productService.saveOrCreateProduct(productForm.product);
-        },
+        child: productService.isSaving
+            ? CircularProgressIndicator(
+                color: Colors.white,
+              )
+            : Icon(Icons.save_outlined),
+        onPressed: productService.isSaving
+            ? null
+            : () async {
+                // Si no es valido
+                if (!productForm.isValidForm()) return;
+                // Si es valido
+                final String? imageUrl = await productService.uploadImage();
+                if (imageUrl != null) productForm.product.picture = imageUrl;
+                await productService.saveOrCreateProduct(productForm.product);
+              },
       ),
     );
+  }
+
+  void pressedImageButton() async {
+    final picker = new ImagePicker();
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+    if (pickedFile == null) {
+      print('No hay nada seleccionado');
+      return;
+    }
+    print('Tenemos imagen ${pickedFile.path}');
+    productService.updateSelectedProductImage(pickedFile.path);
   }
 }
