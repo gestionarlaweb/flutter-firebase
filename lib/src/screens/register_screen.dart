@@ -5,7 +5,7 @@ import 'package:productos_app_firebase/src/utils/validators.dart';
 import 'package:provider/provider.dart';
 import 'package:productos_app_firebase/src/ui_widgets/input_decorations.dart';
 
-class LoginScreen extends StatelessWidget {
+class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +52,7 @@ class _LoginForm extends StatelessWidget {
               height: 35.0,
             ),
             Text(
-              'Login',
+              'Crear cuenta',
               style: TextStyle(fontSize: 24.0),
               textAlign: TextAlign.center,
             ),
@@ -132,16 +132,18 @@ class _LoginForm extends StatelessWidget {
 
                               // Validar si el Token es correcto
                               final String? errorMessage =
-                                  await authService.login(
+                                  await authService.createUSer(
                                       loginFormProvider.email,
                                       loginFormProvider.password);
+
                               // Si es null todo correcto
                               if (errorMessage == null) {
                                 Navigator.pushReplacementNamed(context, 'home');
                               } else {
                                 // Mostrar error en pantalla
                                 print(errorMessage);
-                                NotificationsService.showSnackbar(errorMessage);
+                                NotificationsService.showSnackbar(
+                                    'El email ya existe !');
                                 loginFormProvider.isLoading = false;
                               }
                             }),
@@ -150,14 +152,9 @@ class _LoginForm extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushReplacementNamed(context, 'register');
+                Navigator.pushReplacementNamed(context, 'login');
               },
-              style: ButtonStyle(
-                overlayColor:
-                    MaterialStateProperty.all(Colors.indigo.withOpacity(0.1)),
-                shape: MaterialStateProperty.all(StadiumBorder()),
-              ),
-              child: Text('No tienes cuenta ? Registrate.',
+              child: Text('Ya tienes cuenta ? Logeate.',
                   style: TextStyle(fontSize: 14, color: Colors.deepPurple)),
             ),
           ],
